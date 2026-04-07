@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NoteRecap — AI Meeting Notes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #6C47FF;
+      --primary-dark: #5535e0;
+      --primary-light: #EEE9FF;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --text: #0f0f0f;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --bg: #f9f9fb;
+      --card: #ffffff;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .logo-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .logo-text span { color: var(--primary); }
+
+    .nav-badge {
+      font-size: 0.7rem;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 2.5rem 2rem 1rem;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.35rem 0.9rem;
+      border-radius: 20px;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+      max-width: 600px;
+      margin: 0 auto 0.6rem;
+    }
+
+    .hero h1 span { color: var(--primary); }
+
+    .hero p {
+      font-size: 0.92rem;
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto 1rem;
+      line-height: 1.6;
+    }
+
+    .platform-pills {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    /* MAIN CARD */
+    .main {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 0 1.5rem 4rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .input-wrap {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.85rem 1rem 0.85rem 2.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      color: var(--text);
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(108, 71, 255, 0.12);
+    }
+
+    input[type="text"]::placeholder { color: #aaa; }
+
+    .btn {
+      width: 100%;
+      padding: 0.9rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn:hover { background: var(--primary-dark); }
+    .btn:active { transform: scale(0.99); }
+    .btn:disabled { background: #c4b5fd; cursor: not-allowed; transform: none; }
+
+    /* STATUS */
+    .status-card {
+      margin-top: 1.25rem;
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .status-card.visible { display: block; }
+
+    .status-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: #fafafa;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .status-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    .status-log {
+      padding: 0.85rem 1rem;
+      max-height: 180px;
+      overflow-y: auto;
+      font-size: 0.82rem;
+      line-height: 1.7;
+    }
+
+    .log-entry {
+      display: flex;
+      gap: 0.75rem;
+      color: var(--text);
+    }
+
+    .log-time {
+      color: #bbb;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* RESULT */
+    .result-card {
+      margin-top: 1.25rem;
+      padding: 1.25rem;
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      border: 1.5px solid #bbf7d0;
+      border-radius: 14px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .result-card.visible { display: flex; }
+
+    .result-info { display: flex; align-items: center; gap: 0.75rem; }
+
+    .result-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--success);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .result-label {
+      font-size: 0.78rem;
+      color: #16a34a;
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+    }
+
+    .result-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #15803d;
+    }
+
+    .result-btn {
+      background: var(--success);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 0.55rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .result-btn:hover { background: #16a34a; }
+
+    /* HOW IT WORKS */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin: 1.25rem 0;
+    }
+
+    .step {
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin: 0 auto 0.75rem;
+    }
+
+    .step-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .step-platforms { display: flex; justify-content: center; gap: 0.4rem; margin-bottom: 0.5rem; }
+
+    .step h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+
+    .step p {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* RECAPS */
+    .recaps-section { margin-top: 1.5rem; display: none; }
+    .recaps-section.visible { display: block; }
+
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .recap-item {
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .recap-left { display: flex; align-items: center; gap: 0.75rem; }
+
+    .recap-platform {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .recap-platform.meet { background: #e8f0fe; }
+    .recap-platform.zoom { background: #e0f2fe; }
+
+    .recap-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .recap-date {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.1rem;
+    }
+
+    .recap-link {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .recap-link:hover { text-decoration: underline; }
+
+    /* SPINNER */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.78rem;
+      color: #ccc;
+    }
+
+    footer a { color: var(--primary); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 1.8rem; }
+      .steps { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- SVG symbol definitions -->
+  <svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="icon-meet" viewBox="0 0 48 48">
+      <clipPath id="meet-clip">
+        <rect x="4" y="7" width="26" height="34" rx="4"/>
+      </clipPath>
+      <!-- Body blocks clipped to rounded rect -->
+      <g clip-path="url(#meet-clip)">
+        <rect x="4"  y="7"  width="13" height="17" fill="#EA4335"/><!-- red top-left -->
+        <rect x="4"  y="24" width="13" height="17" fill="#1A73E8"/><!-- blue bottom-left -->
+        <rect x="17" y="7"  width="13" height="17" fill="#FBBC04"/><!-- yellow top-right -->
+        <rect x="17" y="24" width="13" height="17" fill="#34A853"/><!-- green bottom-right -->
+        <!-- white inner square -->
+        <rect x="11" y="15" width="9"  height="18" fill="white"/>
+        <rect x="14" y="13" width="8"  height="22" fill="white"/>
+      </g>
+      <!-- Green camera wedge -->
+      <path d="M30 19l14-8v26l-14-8V19z" fill="#34A853"/>
+    </symbol>
+    <symbol id="icon-zoom" viewBox="0 0 64 64">
+      <rect width="64" height="64" rx="12" fill="#2D8CFF"/>
+      <path d="M10 22a3 3 0 0 1 3-3h22a3 3 0 0 1 3 3v20a3 3 0 0 1-3 3H13a3 3 0 0 1-3-3V22z" fill="white"/>
+      <path d="M39 28l16-8v24l-16-8V28z" fill="white"/>
+    </symbol>
+    <symbol id="icon-gdocs" viewBox="0 0 48 48">
+      <!-- Google Docs icon -->
+      <path d="M30 4H10a4 4 0 0 0-4 4v32a4 4 0 0 0 4 4h28a4 4 0 0 0 4-4V16L30 4z" fill="#4285F4"/>
+      <path d="M30 4v12h12L30 4z" fill="#A8C7FA"/>
+      <rect x="14" y="22" width="20" height="2.5" rx="1.25" fill="white"/>
+      <rect x="14" y="28" width="20" height="2.5" rx="1.25" fill="white"/>
+      <rect x="14" y="34" width="13" height="2.5" rx="1.25" fill="white"/>
+    </symbol>
+  </svg>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="/">
+      <div class="logo-mark">📝</div>
+      <div class="logo-text">Note<span>Recap</span></div>
+    </a>
+    <div class="nav-badge">Beta</div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">✨ AI-powered meeting notes</div>
+    <h1>Your meetings,<br /><span>instantly summarized</span></h1>
+    <p>Paste a Google Meet or Zoom link. NoteRecap joins, records, transcribes, and delivers a structured recap as a Google Doc.</p>
+
+    <div class="platform-pills">
+      <div class="pill">
+        <svg width="18" height="18"><use href="#icon-meet"/></svg>
+        Google Meet
+      </div>
+      <div class="pill">
+        <svg width="18" height="18"><use href="#icon-zoom"/></svg>
+        Zoom
+      </div>
+      <div class="pill">🌍 99 languages</div>
+      <div class="pill">
+        <svg width="16" height="16"><use href="#icon-gdocs"/></svg>
+        Google Docs
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- HOW IT WORKS -->
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-platforms">
+          <svg width="28" height="28"><use href="#icon-meet"/></svg>
+          <svg width="28" height="28"><use href="#icon-zoom"/></svg>
+        </div>
+        <h3>Paste link</h3>
+        <p>Drop any Google Meet or Zoom meeting URL</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-icon">🤖</div>
+        <h3>Bot records</h3>
+        <p>NoteRecap joins and records the full conversation</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-icon">📄</div>
+        <h3>Get recap</h3>
+        <p>Structured notes land in your Google Docs instantly</p>
+      </div>
+    </div>
+
+    <!-- RECORD CARD -->
+    <div class="card">
+      <div class="card-title">🎙️ Start a new recording</div>
+
+      <div class="input-wrap">
+        <span class="input-icon">🔗</span>
+        <input
+          type="text"
+          id="meetingUrl"
+          placeholder="https://meet.google.com/xxx-xxxx-xxx"
+        />
+      </div>
+
+      <button class="btn" id="startBtn" onclick="startRecording()">
+        Start Recording
+      </button>
+
+      <!-- STATUS -->
+      <div class="status-card" id="statusCard">
+        <div class="status-header">
+          <div class="status-title">
+            <div class="pulse" id="pulse"></div>
+            Live status
+          </div>
+        </div>
+        <div class="status-log" id="statusLog"></div>
+      </div>
+
+      <!-- RESULT -->
+      <div class="result-card" id="resultCard">
+        <div class="result-info">
+          <div class="result-icon">✅</div>
+          <div>
+            <div class="result-label">Recap ready</div>
+            <div class="result-title" id="resultTitle">View your meeting notes</div>
+          </div>
+        </div>
+        <a class="result-btn" id="docLink" href="#" target="_blank">Open Doc →</a>
+      </div>
+    </div>
+
+    <!-- RECENT RECAPS -->
+    <div class="recaps-section" id="recapsSection">
+      <div class="section-title">Recent Recaps</div>
+      <div id="recapsList"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    Powered by <a href="#">NoteRecap</a> · noterecap.com · Built with Whisper + Claude AI
+  </footer>
+
+  <script>
+    let pollInterval = null;
+
+    async function startRecording() {
+      const url = document.getElementById('meetingUrl').value.trim();
+      if (!url) {
+        document.getElementById('meetingUrl').focus();
+        return;
+      }
+
+      const btn = document.getElementById('startBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner"></div> Starting...';
+
+      document.getElementById('statusCard').classList.add('visible');
+      document.getElementById('resultCard').classList.remove('visible');
+      document.getElementById('statusLog').innerHTML = '';
+
+      try {
+        const res = await fetch('/api/record', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to start');
+
+        pollStatus(data.jobId);
+      } catch (err) {
+        addLog('❌ ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = 'Start Recording';
+      }
+    }
+
+    function pollStatus(jobId) {
+      pollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/status/${jobId}`);
+          const data = await res.json();
+
+          if (data.logs) {
+            document.getElementById('statusLog').innerHTML = data.logs
+              .map(l => `<div class="log-entry"><span class="log-time">${l.time}</span><span>${l.msg}</span></div>`)
+              .join('');
+            const log = document.getElementById('statusLog');
+            log.scrollTop = log.scrollHeight;
+          }
+
+          if (data.status === 'done') {
+            clearInterval(pollInterval);
+            document.getElementById('pulse').style.background = '#22c55e';
+
+            const btn = document.getElementById('startBtn');
+            btn.disabled = false;
+            btn.innerHTML = 'Start Recording';
+
+            document.getElementById('resultCard').classList.add('visible');
+            document.getElementById('docLink').href = data.docUrl;
+            if (data.title) document.getElementById('resultTitle').textContent = data.title;
+
+            loadRecent();
+          }
+
+          if (data.status === 'error') {
+            clearInterval(pollInterval);
+            document.getElementById('pulse').style.background = '#ef4444';
+            const btn = document.getElementById('startBtn');
+            btn.disabled = false;
+            btn.innerHTML = 'Start Recording';
+            addLog('❌ ' + (data.error || 'Something went wrong'));
+          }
+        } catch {}
+      }, 2000);
+    }
+
+    function addLog(msg) {
+      const log = document.getElementById('statusLog');
+      const time = new Date().toLocaleTimeString();
+      log.innerHTML += `<div class="log-entry"><span class="log-time">${time}</span><span>${msg}</span></div>`;
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function loadRecent() {
+      try {
+        const res = await fetch('/api/recent');
+        const data = await res.json();
+        if (!data.length) return;
+
+        const section = document.getElementById('recapsSection');
+        const list = document.getElementById('recapsList');
+        section.classList.add('visible');
+
+        const meetIcon = `<svg width="18" height="18"><use href="#icon-meet"/></svg>`;
+        const zoomIcon = `<svg width="18" height="18"><use href="#icon-zoom"/></svg>`;
+
+        list.innerHTML = data.map(r => {
+          const isZoom = r.platform === 'zoom';
+          return `
+            <div class="recap-item">
+              <div class="recap-left">
+                <div class="recap-platform ${isZoom ? 'zoom' : 'meet'}">${isZoom ? zoomIcon : meetIcon}</div>
+                <div>
+                  <div class="recap-name">${r.title}</div>
+                  <div class="recap-date">${r.date}</div>
+                </div>
+              </div>
+              <a class="recap-link" href="${r.docUrl}" target="_blank">Open →</a>
+            </div>`;
+        }).join('');
+      } catch {}
+    }
+
+    loadRecent();
+  </script>
+</body>
+</html>

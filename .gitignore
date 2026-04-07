@@ -1,0 +1,5 @@
+.env
+token.json
+node_modules/
+recaps.json
+recordings/
