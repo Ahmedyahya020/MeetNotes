@@ -3,19 +3,13 @@ services:
     name: noterecap
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: starter
+    plan: free
     healthCheckPath: /
-    disk:
-      name: noterecap-data
-      mountPath: /data
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 3000
-      - key: DATA_DIR
-        value: /data
       - key: GOOGLE_REDIRECT_URI
         value: https://noterecap.com/oauth2callback
       - key: GOOGLE_CLIENT_ID
